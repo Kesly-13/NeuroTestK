@@ -12,6 +12,8 @@ import {
   Tooltip, ResponsiveContainer, RadarChart, Radar,
   PolarGrid, PolarAngleAxis, PolarRadiusAxis
 } from "recharts";
+import { guardarParticipante } from "../services/api";
+
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -86,17 +88,113 @@ const MI_KEY: Record<string, number[]> = {
 };
 
 interface MIInfoItem {
-  label: string; short: string; desc: string;
-  color: string; bg: string; Icon: IconFC;
+  label: string;
+  short: string;
+  desc: string;
+  color: string;
+  bg: string;
+  Icon: IconFC;
+  exercises: string[];
 }
+
 const MI_INFO: Record<string, MIInfoItem> = {
-  A: { label: "Verbal / Lingüística",   short: "Verbal",   Icon: BookText,   color: "#6C63FF", bg: "#EDE9FE", desc: "Comprende la capacidad de emplear efectivamente las palabras ya sea en forma oral y escrita. La utilizamos cuando hablamos en conversaciones, ponemos pensamientos por escrito o escribimos cartas." },
-  B: { label: "Lógica / Matemática",    short: "Lógica",   Icon: Calculator, color: "#3B82F6", bg: "#DBEAFE", desc: "Consiste en la capacidad para utilizar los números en forma efectiva y para razonar en forma lógica. Está asociada con el pensamiento científico y la búsqueda de patrones." },
-  C: { label: "Visual / Espacial",      short: "Visual",   Icon: Eye,        color: "#8B5CF6", bg: "#EDE9FE", desc: "Consiste en la capacidad de percibir el mundo visual espacial adecuadamente. Nos permite visualizar las cosas, formarse modelos mentales y maniobrar usando esos modelos." },
-  D: { label: "Corporal / Cinestésica", short: "Corporal", Icon: Activity,   color: "#10B981", bg: "#D1FAE5", desc: "Se encuentra en la capacidad para utilizar el cuerpo entero en expresar ideas y sentimientos. Es la capacidad para resolver problemas empleando el cuerpo o parte del mismo." },
-  E: { label: "Musical / Rítmica",      short: "Musical",  Icon: Music,      color: "#F59E0B", bg: "#FEF3C7", desc: "Es la capacidad para percibir, discriminar, transformar y expresar a través de formas musicales. Implica el aprecio por la música, el canto y el tocar un instrumento." },
-  F: { label: "Intrapersonal",          short: "Intra",    Icon: UserRound,  color: "#EF4444", bg: "#FEE2E2", desc: "Es la capacidad para comprenderse a uno mismo y para actuar en forma autorreflexiva. Involucra el conocimiento de los sentimientos, el proceso pensante y la intuición." },
-  G: { label: "Interpersonal",          short: "Inter",    Icon: Users,      color: "#06B6D4", bg: "#CFFAFE", desc: "Es la capacidad de captar y evaluar en forma rápida los estados de ánimo, intenciones y sentimientos de los demás. Permite desarrollar empatía y mantener la identidad individual." },
+  A: {
+    label: "Verbal / Lingüística",
+    short: "Verbal",
+    Icon: BookText,
+    color: "#6C63FF",
+    bg: "#EDE9FE",
+    desc: "Comprende la capacidad de emplear efectivamente las palabras, tanto de forma oral como escrita. Permite comunicar ideas, expresar pensamientos y utilizar el lenguaje con precisión.",
+    exercises: [
+      "Escoger una palabra del diccionario al azar y utilizarla en conversaciones cotidianas.",
+      "Debatir con otra persona sobre un tema de interés, formulando preguntas y defendiendo opiniones.",
+      "Realizar una presentación oral sobre un libro, un hobby, una experiencia o un tema de interés."
+    ]
+  },
+
+  B: {
+    label: "Lógica / Matemática",
+    short: "Lógica",
+    Icon: Calculator,
+    color: "#3B82F6",
+    bg: "#DBEAFE",
+    desc: "Capacidad para utilizar números, identificar patrones y resolver problemas mediante el razonamiento lógico y analítico.",
+    exercises: [
+      "Clasificar doce objetos utilizando diferentes criterios como color, forma, tamaño o uso.",
+      "Construir un argumento lógico para defender una idea absurda o divertida.",
+      "Crear una secuencia numérica con un patrón oculto y pedir a otra persona que lo descubra."
+    ]
+  },
+
+  C: {
+    label: "Visual / Espacial",
+    short: "Visual",
+    Icon: Eye,
+    color: "#8B5CF6",
+    bg: "#EDE9FE",
+    desc: "Capacidad para percibir, imaginar y manipular mentalmente espacios, formas e imágenes.",
+    exercises: [
+      "Observar las nubes e identificar figuras, animales o rostros en ellas.",
+      "Imaginar que vives en otra época o conversas con un personaje histórico o literario.",
+      "Diseñar un mapa para una búsqueda del tesoro con rutas y pistas."
+    ]
+  },
+
+  D: {
+    label: "Corporal / Cinestésica",
+    short: "Corporal",
+    Icon: Activity,
+    color: "#10B981",
+    bg: "#D1FAE5",
+    desc: "Capacidad para utilizar el cuerpo de manera coordinada con el fin de expresar ideas, resolver problemas o desarrollar habilidades físicas.",
+    exercises: [
+      "Caminar, bailar o trotar adaptando los movimientos al estado de ánimo.",
+      "Realizar actividades cotidianas usando la mano no dominante para mejorar la coordinación.",
+      "Representar una idea o emoción mediante mímica o expresión corporal."
+    ]
+  },
+
+  E: {
+    label: "Musical / Rítmica",
+    short: "Musical",
+    Icon: Music,
+    color: "#F59E0B",
+    bg: "#FEF3C7",
+    desc: "Capacidad para percibir, interpretar, crear y expresar ideas mediante sonidos, ritmos y música.",
+    exercises: [
+      "Escuchar distintos estilos musicales y reflexionar sobre las emociones que generan.",
+      "Expresar emociones únicamente mediante la voz, variando tono, ritmo y volumen.",
+      "Leer una historia acompañándola con efectos de sonido o música."
+    ]
+  },
+
+  F: {
+    label: "Intrapersonal",
+    short: "Intra",
+    Icon: UserRound,
+    color: "#EF4444",
+    bg: "#FEE2E2",
+    desc: "Capacidad para comprenderse a sí mismo, reconocer emociones, fortalezas y aspectos por mejorar mediante la autorreflexión.",
+    exercises: [
+      "Registrar los cambios de estado de ánimo durante el día e identificar sus causas.",
+      "Analizar las estrategias de pensamiento utilizadas en diferentes situaciones.",
+      "Reflexionar sobre fortalezas, debilidades y metas personales."
+    ]
+  },
+
+  G: {
+    label: "Interpersonal",
+    short: "Inter",
+    Icon: Users,
+    color: "#06B6D4",
+    bg: "#CFFAFE",
+    desc: "Capacidad para comprender a los demás, desarrollar empatía y establecer relaciones efectivas mediante la comunicación y el trabajo en equipo.",
+    exercises: [
+      "Observar conscientemente los pensamientos, emociones y sensaciones durante una actividad cotidiana.",
+      "Llevar un diario de reflexión sobre los acontecimientos importantes del día y expresar las emociones mediante arte, música o escritura.",
+      "Imaginar ser un observador externo de los propios pensamientos y reconocer patrones de conducta y emociones."
+    ]
+  }
 };
 
 const LS_QUESTIONS: string[] = [
@@ -1410,13 +1508,41 @@ export default function App() {
   const [currentMIRecord, setCurrentMIRecord] = useState<MIRecord | null>(null);
   const [currentLSRecord, setCurrentLSRecord] = useState<LSRecord | null>(null);
 
-  function handleMIComplete(answers: MIAnswer[]) {
-    const { scores, dominant } = scoreMI(answers);
-    const rec: MIRecord = { id: uid(), type: "mi", name: currentName, date: nowDate(), time: nowTime(), answers, scores, dominant };
-    saveRecord(rec);
-    setCurrentMIRecord(rec);
-    setScreen("mi-analyzing");
+async function handleMIComplete(answers: MIAnswer[]) {
+  const { scores, dominant } = scoreMI(answers);
+
+  const rec: MIRecord = {
+    id: uid(),
+    type: "mi",
+    name: currentName,
+    date: nowDate(),
+    time: nowTime(),
+    answers,
+    scores,
+    dominant
+  };
+
+  // Sigue guardando en localStorage
+  saveRecord(rec);
+
+  // Guarda en la base de datos
+  try {
+    await guardarParticipante({
+      nombre: currentName,
+      inteligencia_principal: MI_INFO[dominant[0]].label,
+      estilo_aprendizaje: null,
+      resultado_mi: scores,
+      resultado_ls: null
+    });
+
+    console.log("✅ Participante guardado en la BD");
+  } catch (error) {
+    console.error("❌ Error al guardar:", error);
   }
+
+  setCurrentMIRecord(rec);
+  setScreen("mi-analyzing");
+}
 
   function handleLSComplete(answers: number[]) {
     const { scores, dominant } = scoreLS(answers);
